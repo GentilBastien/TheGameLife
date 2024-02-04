@@ -6,25 +6,27 @@ import org.bastien.conf.cellstates.EmptyCell;
 import java.util.Arrays;
 import java.util.stream.Stream;
 
-import static org.bastien.conf.Config.HEIGHT;
-import static org.bastien.conf.Config.WIDTH;
+import static org.bastien.conf.Config.CELLS_HEIGHT;
+import static org.bastien.conf.Config.CELLS_WIDTH;
 
 public class Grid {
-    private final Cell[][] grid;
+    private final Cell[][] cells;
     private final CellContextProvider cellContextProvider;
 
     public Grid() {
-        grid = new Cell[HEIGHT][WIDTH];
+        cells = new Cell[CELLS_HEIGHT][CELLS_WIDTH];
 
         // SETUP CONFIG
-        for (Cell[] cells : grid) {
-            Arrays.fill(cells, new EmptyCell());
+        for (int i = 0; i < CELLS_HEIGHT; i++) {
+            for (int j = 0; j < CELLS_WIDTH; j++) {
+                cells[i][j] = new EmptyCell();
+            }
         }
-        this.cellContextProvider = new DirectAdjacentCellContextProvider(grid);
+        this.cellContextProvider = new DirectAdjacentCellContextProvider(cells);
     }
 
     private Stream<Cell> gridFlatten() {
-        return Arrays.stream(this.grid)
+        return Arrays.stream(this.cells)
                 .flatMap(Arrays::stream);
     }
 
@@ -44,5 +46,9 @@ public class Grid {
         System.out.print("computed -> ");
         gridFlatten().parallel().forEach(Cell::applyNextStep);
         System.out.print("updated] ");
+    }
+
+    public Cell[][] getCells() {
+        return cells;
     }
 }
