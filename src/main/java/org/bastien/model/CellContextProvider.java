@@ -5,7 +5,7 @@ import org.bastien.conf.cellstates.State;
 import java.util.Collection;
 
 @FunctionalInterface
-public interface CellContextProvider {
+public interface CellContextProvider<T extends State> {
 
-    Collection<? extends State> provide(State state);
+    Collection<T> provide(T state);
 }

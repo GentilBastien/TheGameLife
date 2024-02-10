@@ -2,10 +2,13 @@ package org.bastien.conf.cellstates;
 
 import org.bastien.model.CellContextProvider;
 
+import java.awt.*;
 import java.util.Collection;
 import java.util.stream.Collectors;
 
 public abstract class State {
+
+    public Color color = Color.BLUE;
 
     public void applyNextState(CellContextProvider contextProvider) {
         Collection<? extends State> context = contextProvider.provide(this);

@@ -1,43 +1,118 @@
 package org.bastien.model;
 
-import org.bastien.conf.cellstates.BooleanState;
+import java.util.Iterator;
+import java.util.List;
 
-import java.util.Arrays;
-import java.util.stream.Stream;
+public class Grid<T> implements Iterable<Grid.Cell<T>> {
+    private final int size;
+    private final List<T> values;
+    private Cell<T> entry;
 
-import static org.bastien.conf.Config.CELLS_HEIGHT;
-import static org.bastien.conf.Config.CELLS_WIDTH;
-
-public class Grid {
-    private final Cell<BooleanState>[][] cells;
-    private CellContextProvider cellContextProvider;
-
-    public Grid() {
-        cells = new Cell[CELLS_HEIGHT][CELLS_WIDTH];
-
-        // SETUP CONFIG
+    public Grid(int width, int height, List<T> values) {
+        size = width * height;
+        this.values = values;
+        buildGrid(width, height, values);
     }
 
-    private Stream<Cell<BooleanState>> gridFlatten() {
-        return Arrays.stream(this.cells).flatMap(Arrays::stream);
+    private void buildGrid(int width, int height, List<T> values) {
+        Iterator<T> iterator = values.iterator();
+        Cell<T> cursor = null, cursorLine = null;
+        for (int i = 0; i < width; i++) {
+            for (int j = 0; j < height; j++) {
+                T value = iterator.next();
+                Cell<T> cell = new Cell<>(value);
+                if (i == 0 && j == 0) {
+                    entry = cell;
+                } else if (j == 0) {
+                    addNewLine(cursorLine, cell);
+                    cursorLine = cell;
+                } else {
+                    addToRight(cursor, cell);
+                }
+                cursor = cell;
+            }
+        }
     }
 
-    public void update() {
-        long ms = System.currentTimeMillis();
-        System.out.print("Frame update : [");
-
-        refresh();
-
-        ms = System.currentTimeMillis() - ms;
-        System.out.println("] (" + ms + "ms).");
+    private void addToRight(Cell<T> previous, Cell<T> cell) {
+        previous.right = cell;
+        cell.left = previous;
+        if (previous.top != null) {
+            final Cell<T> topRightCell = previous.top.right;
+            if (topRightCell != null) {
+                topRightCell.bottom = cell;
+                cell.top = topRightCell;
+            }
+        }
     }
 
-    private void refresh() {
-        gridFlatten().parallel().forEach(null);
-//        a -> a.computeNextState(this.cellContextProvider.provide(a))
+    private void addNewLine(Cell<T> top, Cell<T> cell) {
+        if (top != null) {
+            top.bottom = cell;
+            cell.top = top;
+        }
     }
 
-    public Cell[][] getCells() {
-        return cells;
+    public Cell<T> getEntry() {
+        return entry;
+    }
+
+    public List<T> getValues() {
+        return values;
+    }
+
+    public Cell<T> find(T value) {
+        for (Cell<T> cell : this) {
+            if (cell.value == value) {
+                return cell;
+            }
+        }
+        return null;
+    }
+
+    @Override
+    public Iterator<Cell<T>> iterator() {
+        return new CellIterator();
+    }
+
+    public static class Cell<T> {
+        private final T value;
+        private Cell<T> top, bottom, left, right;
+
+        public Cell(T value) {
+            this.value = value;
+        }
+
+        public T getValue() {
+            return value;
+        }
+
+        public List<T> getDirectAdjacent() {
+            return List.of(top.value, bottom.value, left.value, right.value);
+        }
+
+        public List<T> getAdjacent() {
+            return List.of(top.value, bottom.value, left.value, right.value, top.left.value, top.right.value, bottom.left.value, bottom.right.value);
+        }
+    }
+
+    class CellIterator implements Iterator<Cell<T>> {
+        private Cell<T> cursor = entry, cursorLine = entry;
+
+        @Override
+        public boolean hasNext() {
+            return cursor.right != null || cursorLine.bottom != null;
+        }
+
+        @Override
+        public Cell<T> next() {
+            if (cursor.right != null) {
+                cursor = cursor.right;
+            } else {
+                cursor = cursorLine.bottom;
+                cursorLine = cursor;
+            }
+            return cursor;
+        }
     }
 }

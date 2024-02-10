@@ -1,5 +1,6 @@
 package org.bastien.conf.cellstates;
 
+import java.awt.*;
 import java.util.Collection;
 
 public class BooleanState extends State {
@@ -18,6 +19,7 @@ public class BooleanState extends State {
 
     private void compute(Collection<BooleanState> context) {
         // TODO
-        this.life = false;
+        this.life = Math.random() < 0.2;
+        this.color = this.life ? Color.BLACK : Color.WHITE;
     }
 }
