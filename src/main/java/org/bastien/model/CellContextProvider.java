@@ -1,13 +1,11 @@
 package org.bastien.model;
 
+import org.bastien.conf.cellstates.State;
+
 import java.util.Collection;
 
-public abstract class CellContextProvider {
-    protected final Cell[][] grid;
+@FunctionalInterface
+public interface CellContextProvider {
 
-    public CellContextProvider(Cell[][] grid) {
-        this.grid = grid;
-    }
-
-    public abstract Collection<Cell> provide(Cell cell);
+    Collection<? extends State> provide(State state);
 }

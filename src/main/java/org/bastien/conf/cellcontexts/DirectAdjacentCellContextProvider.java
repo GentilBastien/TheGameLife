@@ -1,20 +1,14 @@
 package org.bastien.conf.cellcontexts;
 
-import org.bastien.model.Cell;
+import org.bastien.conf.cellstates.State;
 import org.bastien.model.CellContextProvider;
 
 import java.util.Collection;
-import java.util.Collections;
 
-public class DirectAdjacentCellContextProvider extends CellContextProvider {
-
-    public DirectAdjacentCellContextProvider(Cell[][] grid) {
-        super(grid);
-    }
+public class DirectAdjacentCellContextProvider implements CellContextProvider {
 
     @Override
-    public Collection<Cell> provide(Cell cell) {
-        //TODO
-        return Collections.singleton(cell);
+    public Collection<? extends State> provide(State state) {
+        return null;
     }
 }
